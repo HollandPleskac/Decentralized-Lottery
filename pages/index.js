@@ -9,15 +9,15 @@ const HomePage = () => {
   const [lottery, setLottery] = useState({})
   const [value, setValue] = useState(0)
   const [feedback, setFeedback] = useState('')
+  const [loading, setLoading] = useState(true)
 
   // got address and abi from deploying contract Lottery.sol in Lottery Project Ethereum Udemy Course --> deploy.js
   const address = '0xBe57df6d9cAf41a41827F2294D46380954bB58e8'
   const abi = '[{"constant":true,"inputs":[],"name":"manager","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"pickWinner","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getPlayers","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"enter","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"players","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
 
-  useEffect(async () => {
-
+  const connectToMetaMaskHandler = async () => {
     // connect to meta mask
-    window.ethereum.request({ method: "eth_requestAccounts" });
+    await window.ethereum.request({ method: "eth_requestAccounts" });
     const web3 = new Web3(window.ethereum);
     console.log(web3)
     setWeb3(web3)
@@ -34,8 +34,8 @@ const HomePage = () => {
     setManager(manager)
     setPlayers(players)
     setBalance(balance)
-
-  }, [])
+    setLoading(false)
+  }
 
   const onSubmitHandler = async (e) => {
     console.log('entering into contract')
@@ -63,33 +63,39 @@ const HomePage = () => {
   }
 
 
+
   return (
     <div className='flex flex-col h-screen justify-center items-center' >
-      <h2 className='font-bold text-lg mb-1' >Lottery Contract</h2>
-      <p>
-        This contract is managed by {manager}.
-        There are currently {players.length} people entered,
-        competing to win {Object.keys(web3).length === 0 ? '' : web3.utils.fromWei(balance)} ether!
-      </p>
-      <hr />
-      <form onSubmit={onSubmitHandler} >
-        <h4 className='font-bold' >Want to try your luck?</h4>
+      {loading && <button className='px-4 py-3 bg-blue-600 text-white rounded' onClick={connectToMetaMaskHandler} >Connect to Metamask</button>}
+      {!loading &&
         <div>
-          <label>Amount of ether to enter</label>
-          <input
-            type="text"
-            value={value}
-            onChange={e => setValue(e.target.value)}
-            className='border-2 border-gray-800 ml-2'
-          />
+          <h2 className='font-bold text-lg mb-1' >Lottery Contract</h2>
+          <p>
+            This contract is managed by {manager}.
+            There are currently {players.length} people entered,
+            competing to win {Object.keys(web3).length === 0 ? '' : web3.utils.fromWei(balance)} ether!
+          </p>
+          <hr />
+          <form onSubmit={onSubmitHandler} >
+            <h4 className='font-bold' >Want to try your luck?</h4>
+            <div>
+              <label>Amount of ether to enter</label>
+              <input
+                type="text"
+                value={value}
+                onChange={e => setValue(e.target.value)}
+                className='border-2 border-gray-800 ml-2'
+              />
+            </div>
+            <button className='border-2 border-gray-800 px-4' >Enter</button>
+          </form>
+          <hr />
+          <h4 className='font-bold' >Ready to pick a winner?</h4>
+          <button className='border-2 border-gray-800 px-4' onClick={pickWinnerHandler} >Pick a winner!</button>
+          <hr />
+          <h1>{feedback}</h1>
         </div>
-        <button className='border-2 border-gray-800 px-4' >Enter</button>
-      </form>
-      <hr />
-      <h4 className='font-bold' >Ready to pick a winner?</h4>
-      <button className='border-2 border-gray-800 px-4' onClick={pickWinnerHandler} >Pick a winner!</button>
-      <hr />
-      <h1>{feedback}</h1>
+      }
     </div>
   )
 }
