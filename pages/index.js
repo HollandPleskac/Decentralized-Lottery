@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMoon } from '@fortawesome/free-solid-svg-icons'
+import { faMoon, faTrophy } from '@fortawesome/free-solid-svg-icons'
 
 const HomePage = () => {
   return (
@@ -18,9 +18,12 @@ const HomePage = () => {
           <button className='px-4 mr-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-50 transition ease-in duraiton-100' style={{ height: 40 }} >
             Connect to MetaMask
           </button>
-          <button className='bg-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-50  transition ease-in duration-100' style={{ width: 40, height: 40 }} >
+          <button className='bg-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring focus:ring-black focus:ring-opacity-25  transition ease-in duration-100' style={{ width: 40, height: 40 }} >
             <FontAwesomeIcon icon={faMoon} className='text-white' />
           </button>
+          {/* <button className='ml-4 bg-red-700 rounded-lg hover:bg-red-800 focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-50  transition ease-in duration-100' style={{ width: 40, height: 40 }} >
+            <FontAwesomeIcon icon={faTrophy} className='text-white' />
+          </button> */}
         </div>
       </div>
       <div className='flex-grow flex flex-col justify-center items-center' >
