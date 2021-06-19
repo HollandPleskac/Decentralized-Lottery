@@ -5,7 +5,7 @@ const abi = '[{"constant":true,"inputs":[],"name":"manager","outputs":[{"name":"
 import React, { useContext, useState, useEffect } from 'react'
 import Web3Context from '../context/web3Context'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMoon, faTrophy } from '@fortawesome/free-solid-svg-icons'
+import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 
 const HomePage = () => {
   const ctx = useContext(Web3Context)
@@ -44,15 +44,9 @@ const HomePage = () => {
     setEnteredEther('')
   }
 
-  const pickWinner = async () => {
-    const accounts = await ctx.onGetAccounts()
-    await contract.methods.pickWinner().send({ from: accounts[0] })
-  }
-
   const enteredEtherChangeHandler = (e) => {
     setEnteredEther(e.target.value)
   }
-
 
   return (
     <div className='flex flex-col h-screen' >
@@ -62,23 +56,8 @@ const HomePage = () => {
           <h1 className='text-gray-800 text-xl pl-4' >Lottery</h1>
         </div>
         <div className='flex' >
-          {
-            ctx.connection !== null && <button onClick={ctx.onClickMetaMaskBtn} className='px-4 mr-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-50 transition ease-in duraiton-100' style={{ height: 40 }} >
-              {ctx.connection === 'NOT INSTALLED' && 'Install MetaMask Here'}
-              {ctx.connection === 'DISCONNECTED' && 'Connect to MetaMask'}
-              {ctx.connection === 'CONNECTED' && 'Connected to MetaMask'}
-            </button>
-          }
-          <button className='bg-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring focus:ring-black focus:ring-opacity-25  transition ease-in duration-100' style={{ width: 40, height: 40 }} >
-            <FontAwesomeIcon icon={faMoon} className='text-white' />
-          </button>
-          {
-            manager !== ''
-              ? <button onClick={pickWinner} className='ml-4 bg-red-700 rounded-lg hover:bg-red-800 focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-50  transition ease-in duration-100' style={{ width: 40, height: 40 }} >
-                <FontAwesomeIcon icon={faTrophy} className='text-white' />
-              </button>
-              : <div className='ml-4' style={{ width: 40 }} ></div>
-          }
+          <MetaMaskBtn />
+          <PickWinnerBtn accounts={ctx.accounts} manager={manager} />
         </div>
       </div>
       <div className='flex-grow flex flex-col justify-center items-center' >
@@ -96,4 +75,49 @@ const HomePage = () => {
   )
 }
 
+const MetaMaskBtn = () => {
+  const ctx = useContext(Web3Context)
+
+  if (ctx.connection !== null)
+    return (
+      <button onClick={ctx.onClickMetaMaskBtn} className='px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-50 transition ease-in duraiton-100' style={{ height: 40 }} >
+        {ctx.connection === 'NOT INSTALLED' && 'Install MetaMask Here'}
+        {ctx.connection === 'DISCONNECTED' && 'Connect to MetaMask'}
+        {ctx.connection === 'CONNECTED' && 'Connected to MetaMask'}
+      </button>
+    )
+}
+
+
+const PickWinnerBtn = ({ accounts, manager }) => {
+
+  const pickWinnerHandler = async () => {
+    const accounts = await ctx.onGetAccounts()
+    await contract.methods.pickWinner().send({ from: accounts[0] })
+  }
+
+  const enabledClasses = 'bg-red-700 rounded-lg hover:bg-red-800 focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-50'
+  const disabledClasses = 'bg-gray-200 cursor-default focus:outline-none'
+  const btnClasses = accounts[0] !== manager ? enabledClasses : disabledClasses
+
+  if (manager === null) {
+    // loading
+    return (
+      <div style={{ width: 40, height: 40 }} className='ml-4' ></div>
+    )
+  }
+
+  return (
+    <button onClick={pickWinnerHandler} className={`ml-4 rounded-lg transition ease-in duration-100 ${btnClasses}`} style={{ width: 40, height: 40 }} >
+      <FontAwesomeIcon icon={faTrophy} className='text-white' />
+    </button>
+  )
+}
+
+
 export default HomePage
+
+// dark mode btn :
+//   <button className = 'bg-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring focus:ring-black focus:ring-opacity-25  transition ease-in duration-100' style = {{ width: 40, height: 40 }} >
+//     <FontAwesomeIcon icon={faMoon} className='text-white' />
+//   </button >
