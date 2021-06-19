@@ -14,6 +14,9 @@ export const Web3ContextProvider = (props) => {
   const [accounts, setAccounts] = useState([])
 
   const isMetaMaskInstalled = async () => {
+    console.log('making sure that meta mask is installed')
+    console.log(ethereum)
+    console.log(ethereum.isMetaMask)
     return ethereum && ethereum.isMetaMask
   }
 
