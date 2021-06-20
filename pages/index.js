@@ -1,15 +1,81 @@
 // got address and abi from deploying contract Lottery.sol in Lottery Project Ethereum Udemy Course --> deploy.js
-const address = '0xBe57df6d9cAf41a41827F2294D46380954bB58e8'
-const abi = '[{"constant":true,"inputs":[],"name":"manager","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"pickWinner","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getPlayers","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"enter","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"players","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
+const address = '0x2eF0a232d58B0B65eEeBb4cfE4bE5F8Eb046b704'
+const abi = `
+[{
+  "inputs": [],
+    "name": "enter",
+      "outputs": [],
+        "stateMutability": "payable",
+          "type": "function"
+},
+{
+  "inputs": [],
+    "name": "pickWinner",
+      "outputs": [],
+        "stateMutability": "payable",
+          "type": "function"
+},
+{
+  "inputs": [],
+    "stateMutability": "nonpayable",
+      "type": "constructor"
+},
+{
+  "inputs": [],
+    "name": "getPlayers",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+        "stateMutability": "view",
+          "type": "function"
+},
+{
+  "inputs": [],
+    "name": "manager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+        "stateMutability": "view",
+          "type": "function"
+},
+{
+  "inputs": [
+    {
+      "internalType": "uint256",
+      "name": "",
+      "type": "uint256"
+    }
+  ],
+    "name": "players",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+        "stateMutability": "view",
+          "type": "function"
+}]`
 
 import React, { useContext, useState, useEffect } from 'react'
 import Web3Context from '../context/web3Context'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrophy } from '@fortawesome/free-solid-svg-icons'
 import ClipLoader from "react-spinners/ClipLoader";
+import { useRouter } from 'next/router'
 
 const HomePage = () => {
   const ctx = useContext(Web3Context)
+
   const [contract, setContract] = useState(null)
   const [manager, setManager] = useState(null)
   const [players, setPlayers] = useState(null)
@@ -45,13 +111,14 @@ const HomePage = () => {
         </div>
         <div className='flex' >
           <MetaMaskBtn />
-          <PickWinnerBtn accounts={ctx.accounts} manager={manager} contract={contract} />
+          <PickWinnerBtn manager={manager} contract={contract} />
         </div>
       </div>
       <div className='flex-grow flex flex-col justify-center items-center' >
         {ctx.connection === 'CONNECTED' && <ConnectedContent players={players} totalEther={totalEther} contract={contract} />}
         {ctx.connection === 'DISCONNECTED' && <DisconnectedContent />}
         {ctx.connection === 'NOT INSTALLED' && <MetaMaskNotInstalledContent />}
+
       </div>
 
     </div>
@@ -67,14 +134,27 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
   const [loading, setLoading] = useState(false)
 
   const enterLotteryHandler = async () => {
+
+    if (isNaN(enteredEther)) {
+      setFeedback('Ether entered must be a number!')
+      return
+    } else if (enteredEther <= 0.1) {
+      setFeedback('Ether entered must be greater than 0.1!')
+      return
+    }
+
     const accounts = ctx.accounts
     setLoading(true)
-    await contract.methods.enter().send({
-      from: accounts[0],
-      value: ctx.web3.utils.toWei(enteredEther, 'ether')
-    })
+    try {
+      await contract.methods.enter().send({
+        from: accounts[0],
+        value: ctx.web3.utils.toWei(enteredEther, 'ether')
+      })
+      setFeedback('')
+    } catch (e) {
+      setFeedback(e.message.replace('MetaMask Tx Signature: ', '').replace('.', ''))
+    }
     setEnteredEther('')
-    setFeedback('')
     setLoading(false)
   }
 
@@ -86,7 +166,7 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
     <>
       <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
       <h1 className='text-5xl text-blue-600 ' >Want to try your luck?</h1>
-      <p className='mt-4 text-gray-600' >{players && players.length} people entered, competing to win {totalEther} ether</p>
+      <p className='mt-4 text-gray-600' >{(players && players.length) || 0} people entered, competing to win {totalEther || 0} ether</p>
       <div className='flex items-center mt-10' >
         <EtherInput value={enteredEther} changeHandler={enteredEtherChangeHandler} loading={loading} />
         <EnterBtn enterLottery={enterLotteryHandler} loading={loading} />
@@ -100,15 +180,26 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
   )
 }
 
+
 const DisconnectedContent = () => {
   return (
-    <h1>Disconnected!</h1>
+    <p className='text-gray-800 text-lg' >Connect to MetaMask by clicking the button in the top right corner!</p>
   )
 }
 
-const MetaMaskNotInstalledContent = (params) => {
+
+const MetaMaskNotInstalledContent = () => {
+  const router = useRouter()
+
+  const installHandler = () => {
+    router.push('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn')
+  }
+
+
   return (
-    <h1>Meta mask not installed</h1>
+    <button onClick={installHandler} className='bg-blue-600 text-white rounded-lg px-8 py-3 hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-400 focus:ring-opacity-50 transition ease-in duraiton-100' >
+      Install MetaMask to Continue
+    </button>
   )
 }
 
@@ -128,7 +219,7 @@ const MetaMaskBtn = () => {
 }
 
 
-const PickWinnerBtn = ({ accounts, manager, contract }) => {
+const PickWinnerBtn = ({ manager, contract }) => {
   const ctx = useContext(Web3Context)
 
   const pickWinnerHandler = async () => {
@@ -136,18 +227,14 @@ const PickWinnerBtn = ({ accounts, manager, contract }) => {
     await contract.methods.pickWinner().send({ from: accounts[0] })
   }
 
-  const enabledClasses = 'bg-red-700 rounded-lg hover:bg-red-800 focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-50'
-  const disabledClasses = 'bg-gray-200 cursor-default focus:outline-none'
-  const btnClasses = accounts[0] === manager ? enabledClasses : disabledClasses
-
-  // loading
-  if (manager === null)
+  // not connected
+  if (manager === null || parseFloat(ctx.accounts[0]) !== parseFloat(manager))
     return (
-      <div style={{ width: 40, height: 40 }} className='ml-4' ></div>
+      <div></div>
     )
 
   return (
-    <button onClick={pickWinnerHandler} className={`ml-4 rounded-lg transition ease-in duration-100 ${btnClasses}`} style={{ width: 40, height: 40 }} >
+    <button onClick={pickWinnerHandler} className='ml-4 rounded-lg bg-red-700 hover:bg-red-800 focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-50 transition ease-in duration-100' style={{ width: 40, height: 40 }} >
       <FontAwesomeIcon icon={faTrophy} className='text-white' />
     </button>
   )
