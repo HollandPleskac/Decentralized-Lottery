@@ -11,11 +11,11 @@ const Web3Context = React.createContext({
 
 export const Web3ContextProvider = (props) => {
   const router = useRouter()
-  
+
   const [connection, setConnection] = useState('')
   const [web3, setWeb3] = useState(null)
   const [accounts, setAccounts] = useState([])
-  
+
   const isMetaMaskInstalled = async () => {
     // if they dont have metamask 'ethereum' doesnt exist, need to use 'window.ethereum'
     console.log('making sure that meta mask is installed', window.ethereum)

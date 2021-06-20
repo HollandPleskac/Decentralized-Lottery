@@ -15,10 +15,6 @@ const HomePage = () => {
   const [players, setPlayers] = useState(null)
   const [totalEther, setTotalEther] = useState(null)
 
-  const [enteredEther, setEnteredEther] = useState('')
-  const [feedback, setFeedback] = useState('')
-  const [loading, setLoading] = useState(false)
-
   useEffect(async () => {
     console.log(ctx.web3)
     if (ctx.web3) {
@@ -38,6 +34,38 @@ const HomePage = () => {
     }
   }, [ctx.web3])
 
+
+
+  return (
+    <div className='flex flex-col h-screen' >
+      <div className='flex justify-between items-center py-5 px-10 bg-white shadow'>
+        <div className='flex items-center' >
+          <img src="/mountain-logo.png" alt="Logo" width='48' />
+          <h1 className='text-gray-800 text-xl pl-4' >Lottery</h1>
+        </div>
+        <div className='flex' >
+          <MetaMaskBtn />
+          <PickWinnerBtn accounts={ctx.accounts} manager={manager} contract={contract} />
+        </div>
+      </div>
+      <div className='flex-grow flex flex-col justify-center items-center' >
+        {ctx.connection === 'CONNECTED' && <ConnectedContent players={players} totalEther={totalEther} contract={contract} />}
+        {ctx.connection === 'DISCONNECTED' && <DisconnectedContent />}
+        {ctx.connection === 'NOT INSTALLED' && <MetaMaskNotInstalledContent />}
+      </div>
+
+    </div>
+  )
+}
+
+
+const ConnectedContent = ({ players, totalEther, contract }) => {
+  const ctx = useContext(Web3Context)
+
+  const [enteredEther, setEnteredEther] = useState('')
+  const [feedback, setFeedback] = useState('')
+  const [loading, setLoading] = useState(false)
+
   const enterLotteryHandler = async () => {
     const accounts = ctx.accounts
     setLoading(true)
@@ -55,35 +83,36 @@ const HomePage = () => {
   }
 
   return (
-    <div className='flex flex-col h-screen' >
-      <div className='flex justify-between items-center py-5 px-10 bg-white shadow'>
-        <div className='flex items-center' >
-          <img src="/mountain-logo.png" alt="Logo" width='48' />
-          <h1 className='text-gray-800 text-xl pl-4' >Lottery</h1>
-        </div>
-        <div className='flex' >
-          <MetaMaskBtn />
-          <PickWinnerBtn accounts={ctx.accounts} manager={manager} contract={contract} />
-        </div>
+    <>
+      <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
+      <h1 className='text-5xl text-blue-600 ' >Want to try your luck?</h1>
+      <p className='mt-4 text-gray-600' >{players && players.length} people entered, competing to win {totalEther} ether</p>
+      <div className='flex items-center mt-10' >
+        <EtherInput value={enteredEther} changeHandler={enteredEtherChangeHandler} loading={loading} />
+        <EnterBtn enterLottery={enterLotteryHandler} loading={loading} />
       </div>
-      <div className='flex-grow flex flex-col justify-center items-center' >
-        <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
-        <h1 className='text-5xl text-blue-600 ' >Want to try your luck?</h1>
-        <p className='mt-4 text-gray-600' >{players && players.length} people entered, competing to win {totalEther} ether</p>
-        <div className='flex items-center mt-10' >
-          <EtherInput value={enteredEther} changeHandler={enteredEtherChangeHandler} loading={loading} />
-          <EnterBtn enterLottery={enterLotteryHandler} loading={loading} />
-        </div>
-        {
-          feedback === ''
-            ? <p className='text-gray-600 text-sm mt-2' >&nbsp;</p>
-            : <p className='text-gray-600 text-sm mt-2' >{feedback}</p>
-        }
-      </div>
-
-    </div>
+      {
+        feedback === ''
+          ? <p className='text-gray-600 text-sm mt-2' >&nbsp;</p>
+          : <p className='text-gray-600 text-sm mt-2' >{feedback}</p>
+      }
+    </>
   )
 }
+
+const DisconnectedContent = () => {
+  return (
+    <h1>Disconnected!</h1>
+  )
+}
+
+const MetaMaskNotInstalledContent = (params) => {
+  return (
+    <h1>Meta mask not installed</h1>
+  )
+}
+
+
 
 const MetaMaskBtn = () => {
   const ctx = useContext(Web3Context)
@@ -124,6 +153,7 @@ const PickWinnerBtn = ({ accounts, manager, contract }) => {
   )
 }
 
+
 const EtherInput = ({ loading, value, changeHandler }) => {
 
   const disabledClasses = 'bg-gray-50'
@@ -141,7 +171,6 @@ const EtherInput = ({ loading, value, changeHandler }) => {
     />
   )
 }
-
 
 
 const EnterBtn = ({ enterLottery, loading }) => {
