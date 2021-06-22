@@ -224,10 +224,10 @@ const MetaMaskBtn = () => {
 const PickWinnerBtn = ({ manager, contract }) => {
   const ctx = useContext(Web3Context)
 
-  console.log('_')
-  console.log('accounts[0]', ctx.accounts[0])
-  console.log('manager', manager)
-  console.log('are equal', parseFloat(ctx.accounts[0]) === parseFloat(manager))
+  // console.log('_')
+  // console.log('accounts[0]', ctx.accounts[0].toLowerCase())
+  // console.log('manager', manager)
+  // console.log('are equal', parseFloat(ctx.accounts[0]) === parseFloat(manager))
 
 
   const pickWinnerHandler = async () => {
@@ -235,8 +235,8 @@ const PickWinnerBtn = ({ manager, contract }) => {
     await contract.methods.pickWinner().send({ from: accounts[0] })
   }
 
-  // not connected
-  if (manager === null || parseFloat(ctx.accounts[0]) !== parseFloat(manager))
+  // not connected (only way to check if addresses are definitively equal to to convert both addresses (strings) to lower case characters)
+  if (manager === null || ctx.accounts[0].toLowerCase() !== manager)
     return (
       <div></div>
     )
