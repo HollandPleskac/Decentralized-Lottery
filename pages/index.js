@@ -1,70 +1,72 @@
-// got address and abi from deploying contract Lottery.sol in Lottery Project Ethereum Udemy Course --> deploy.js
-const address = '0x2eF0a232d58B0B65eEeBb4cfE4bE5F8Eb046b704'
+// got address and abi from remix editor
+const address = '0x42cE7979e69980164dF85ebA7DE728296Bd9465E'
 const abi = `
-[{
-  "inputs": [],
-    "name": "enter",
-      "outputs": [],
-        "stateMutability": "payable",
-          "type": "function"
-},
-{
-  "inputs": [],
-    "name": "pickWinner",
-      "outputs": [],
-        "stateMutability": "payable",
-          "type": "function"
-},
-{
-  "inputs": [],
-    "stateMutability": "nonpayable",
-      "type": "constructor"
-},
-{
-  "inputs": [],
-    "name": "getPlayers",
-      "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-        "stateMutability": "view",
-          "type": "function"
-},
-{
-  "inputs": [],
-    "name": "manager",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-        "stateMutability": "view",
-          "type": "function"
-},
-{
-  "inputs": [
-    {
-      "internalType": "uint256",
-      "name": "",
-      "type": "uint256"
-    }
-  ],
-    "name": "players",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-        "stateMutability": "view",
-          "type": "function"
-}]`
+[
+	{
+		"inputs": [],
+		"name": "enter",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pickWinner",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "getPlayers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "manager",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "players",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]`
 
 import React, { useContext, useState, useEffect } from 'react'
 import Web3Context from '../context/web3Context'
