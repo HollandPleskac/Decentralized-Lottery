@@ -224,6 +224,12 @@ const MetaMaskBtn = () => {
 const PickWinnerBtn = ({ manager, contract }) => {
   const ctx = useContext(Web3Context)
 
+  console.log('_')
+  console.log('accounts[0]', ctx.accounts[0])
+  console.log('manager', manager)
+  console.log('are equal', parseFloat(ctx.accounts[0]) === parseFloat(manager))
+
+
   const pickWinnerHandler = async () => {
     const accounts = ctx.accounts
     await contract.methods.pickWinner().send({ from: accounts[0] })
