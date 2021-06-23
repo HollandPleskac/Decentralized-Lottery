@@ -1,5 +1,5 @@
 // got address and abi from remix editor
-const address = '0x42cE7979e69980164dF85ebA7DE728296Bd9465E'
+const address = '0x9fDe81db5CFD8668dd6aAB66cBC5D2517B57CeF3'
 const abi = `
 [
 	{
@@ -11,9 +11,40 @@ const abi = `
 	},
 	{
 		"inputs": [],
+		"name": "getRandomNumber",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "pickWinner",
 		"outputs": [],
 		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "randomness",
+				"type": "uint256"
+			}
+		],
+		"name": "rawFulfillRandomness",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -61,6 +92,19 @@ const abi = `
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "randomResult",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -164,6 +208,17 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
     setEnteredEther(e.target.value)
   }
 
+  const getRandomHandler = async () => {
+    console.log('getting a random number')
+    await contract.methods.getRandomNumber().send({
+      from: ctx.accounts[0]
+    })
+    console.log('generated the random number')
+
+    console.log('getting the random number', await contract.methods.randomResult().call())
+  }
+
+
   return (
     <>
       <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
@@ -178,6 +233,9 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
           ? <p className='text-gray-600 text-sm mt-2' >&nbsp;</p>
           : <p className='text-gray-600 text-sm mt-2' >{feedback}</p>
       }
+      <button onClick={getRandomHandler} >
+        Get a random number
+      </button>
     </>
   )
 }
@@ -236,7 +294,7 @@ const PickWinnerBtn = ({ manager, contract }) => {
   }
 
   // not connected (only way to check if addresses are definitively equal to to convert both addresses (strings) to lower case characters)
-  if (manager === null || ctx.accounts[0].toLowerCase() !== manager)
+  if (manager === null || !ctx.accounts[0] || ctx.accounts[0].toLowerCase() !== manager.toLowerCase())
     return (
       <div></div>
     )
