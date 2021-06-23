@@ -1,5 +1,5 @@
 // got address and abi from remix editor
-const address = '0x9fDe81db5CFD8668dd6aAB66cBC5D2517B57CeF3'
+const address = '0x24C42b4D1B8A60E201874e93A3e41A18C2eC14D6'
 const abi = `
 [
 	{
@@ -208,17 +208,6 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
     setEnteredEther(e.target.value)
   }
 
-  const getRandomHandler = async () => {
-    console.log('getting a random number')
-    await contract.methods.getRandomNumber().send({
-      from: ctx.accounts[0]
-    })
-    console.log('generated the random number')
-
-    console.log('getting the random number', await contract.methods.randomResult().call())
-  }
-
-
   return (
     <>
       <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
@@ -233,9 +222,6 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
           ? <p className='text-gray-600 text-sm mt-2' >&nbsp;</p>
           : <p className='text-gray-600 text-sm mt-2' >{feedback}</p>
       }
-      <button onClick={getRandomHandler} >
-        Get a random number
-      </button>
     </>
   )
 }
