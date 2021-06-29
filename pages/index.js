@@ -1,115 +1,184 @@
+// architecture
+
+/*
+
+onClick pick winner:
+  request random number
+  start loading
+
+fulfill randomness function
+  emit event (pick winner)
+
+listening for events {
+  
+  onPickWinner {
+    return value of winner(index)
+    pickWinner(index -> send money to winner)
+    end loading
+  }
+
+}
+
+*/
+
+
+
 // got address and abi from remix editor
-const address = '0x24C42b4D1B8A60E201874e93A3e41A18C2eC14D6'
+const address = '0x9Becf50fce7c95ED9aAfd59AB9df35899820f9C1'
 const abi = `
 [
-	{
-		"inputs": [],
-		"name": "enter",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getRandomNumber",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "pickWinner",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "randomness",
-				"type": "uint256"
-			}
-		],
-		"name": "rawFulfillRandomness",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [],
-		"name": "getPlayers",
-		"outputs": [
-			{
-				"internalType": "address[]",
-				"name": "",
-				"type": "address[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "manager",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "players",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "randomResult",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "date",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "value",
+        "type": "string"
+      }
+    ],
+    "name": "MyEvent",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "value",
+        "type": "string"
+      }
+    ],
+    "name": "emitEvent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "enter",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPlayers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "manager",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "randomNum",
+        "type": "uint256"
+      }
+    ],
+    "name": "pickWinner",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "players",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "randomResult",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "requestId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "randomness",
+        "type": "uint256"
+      }
+    ],
+    "name": "rawFulfillRandomness",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "requestRandomNumber",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "requestId",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
 ]`
 
 import React, { useContext, useState, useEffect } from 'react'
@@ -164,7 +233,6 @@ const HomePage = () => {
         {ctx.connection === 'CONNECTED' && <ConnectedContent players={players} totalEther={totalEther} contract={contract} />}
         {ctx.connection === 'DISCONNECTED' && <DisconnectedContent />}
         {ctx.connection === 'NOT INSTALLED' && <MetaMaskNotInstalledContent />}
-
       </div>
 
     </div>
@@ -178,6 +246,21 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
   const [enteredEther, setEnteredEther] = useState('')
   const [feedback, setFeedback] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const [sub, setSub] = useState(null)
+
+  useEffect(() => {
+    const subscription = contract.events.MyEvent({ fromBlock: 'latest' })
+      .on('data', async event => {
+        console.log('new event', event)
+        const randomNum = await contract.methods.randomResult().call()
+        await contract.methods.pickWinner(randomNum).send({ from: ctx.accounts[0] })
+        console.log('got a random number', randomNum)
+      })
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const enterLotteryHandler = async () => {
 
@@ -208,6 +291,26 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
     setEnteredEther(e.target.value)
   }
 
+  const listenHandler = async () => {
+    console.log('listening for events')
+    const subscription = contract.events.MyEvent({ fromBlock: 0 }).on('data', event => console.log('new event', event))
+    console.log('Subscription', subscription)
+    setSub(subscription)
+  }
+
+  const emitHandler = async () => {
+    await contract.methods.emitEvent('hey!').send({ from: ctx.accounts[0] })
+  }
+
+  const unsubscribeHandler = async () => {
+    await sub.unsubscribe((error, success) => {
+      if (success)
+        console.log('Successfully unsubscribed!');
+      else
+        console.log('Error unsubscribing', error)
+    })
+  }
+
   return (
     <>
       <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
@@ -222,6 +325,11 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
           ? <p className='text-gray-600 text-sm mt-2' >&nbsp;</p>
           : <p className='text-gray-600 text-sm mt-2' >{feedback}</p>
       }
+      <button onClick={listenHandler} >
+        Click to listen to events
+      </button>
+      <button onClick={emitHandler} >Emit a new event</button>
+      <button onClick={unsubscribeHandler} >unsubscribe</button>
     </>
   )
 }
@@ -268,15 +376,12 @@ const MetaMaskBtn = () => {
 const PickWinnerBtn = ({ manager, contract }) => {
   const ctx = useContext(Web3Context)
 
-  // console.log('_')
-  // console.log('accounts[0]', ctx.accounts[0].toLowerCase())
-  // console.log('manager', manager)
-  // console.log('are equal', parseFloat(ctx.accounts[0]) === parseFloat(manager))
-
-
   const pickWinnerHandler = async () => {
     const accounts = ctx.accounts
-    await contract.methods.pickWinner().send({ from: accounts[0] })
+    // set loading true 
+    // request a random number
+    console.log('requesting a random number')
+    await contract.methods.requestRandomNumber().send({ from: accounts[0] })
   }
 
   // not connected (only way to check if addresses are definitively equal to to convert both addresses (strings) to lower case characters)
