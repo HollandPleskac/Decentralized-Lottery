@@ -24,161 +24,174 @@ listening for events {
 
 
 // got address and abi from remix editor
-const address = '0x9Becf50fce7c95ED9aAfd59AB9df35899820f9C1'
+const address = '0x9fc9f5FBdEC499E986dB977984DF2ACf2caBDaed'
 const abi = `
 [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "date",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "string",
-        "name": "value",
-        "type": "string"
-      }
-    ],
-    "name": "MyEvent",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "value",
-        "type": "string"
-      }
-    ],
-    "name": "emitEvent",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "enter",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getPlayers",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "manager",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "randomNum",
-        "type": "uint256"
-      }
-    ],
-    "name": "pickWinner",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "players",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "randomResult",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "randomness",
-        "type": "uint256"
-      }
-    ],
-    "name": "rawFulfillRandomness",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "requestRandomNumber",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "value",
+				"type": "string"
+			}
+		],
+		"name": "emitEvent",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "enter",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "value",
+				"type": "string"
+			}
+		],
+		"name": "MyEvent",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "randomNum",
+				"type": "uint256"
+			}
+		],
+		"name": "pickWinner",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "randomness",
+				"type": "uint256"
+			}
+		],
+		"name": "rawFulfillRandomness",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "requestRandomNumber",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPlayers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "manager",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "players",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "randomResult",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "state",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
 ]`
 
 import React, { useContext, useState, useEffect } from 'react'
@@ -246,17 +259,30 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
   const [enteredEther, setEnteredEther] = useState('')
   const [feedback, setFeedback] = useState('')
   const [loading, setLoading] = useState(false)
+  const [contractState, setContractState] = useState('')
 
-  const [sub, setSub] = useState(null)
+  useEffect(async () => {
 
-  useEffect(() => {
+    const initialContractState = await contract.methods.state().call()
+    console.log('initial state', initialContractState)
+    setContractState(initialContractState)
+
     const subscription = contract.events.MyEvent({ fromBlock: 'latest' })
       .on('data', async event => {
-        console.log('new event', event)
-        const randomNum = await contract.methods.randomResult().call()
-        await contract.methods.pickWinner(randomNum).send({ from: ctx.accounts[0] })
-        console.log('got a random number', randomNum)
+        const beforeState = await contract.methods.state().call()
+        console.log('state before picking winner', beforeState)
+        setContractState(beforeState)
+
+        const randomNumber = await contract.methods.randomResult().call()
+        console.log('random number', randomNumber)
+        await contract.methods.pickWinner(randomNumber).send({ from: ctx.accounts[0] })
+
+        const afterState = await contract.methods.state().call()
+        console.log('state after picking winner', afterState)
+        // show pop up here (winner chosen was...)
+        setContractState(afterState)
       })
+
     return () => {
       subscription.unsubscribe()
     }
@@ -293,7 +319,7 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
 
   const listenHandler = async () => {
     console.log('listening for events')
-    const subscription = contract.events.MyEvent({ fromBlock: 0 }).on('data', event => console.log('new event', event))
+    const subscription = contract.events.MyEvent({ fromBlock: 'latest' }).on('data', event => console.log('new event', event))
     console.log('Subscription', subscription)
     setSub(subscription)
   }
@@ -310,6 +336,9 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
         console.log('Error unsubscribing', error)
     })
   }
+
+  if (contractState === 'Picking Winner' )
+    return ( <div>Picking the winner</div> )
 
   return (
     <>
@@ -338,6 +367,14 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
 const DisconnectedContent = () => {
   return (
     <p className='text-gray-800 text-lg' >Connect to MetaMask by clicking the button in the top right corner!</p>
+  )
+}
+
+const PickingWinnerContent = () => {
+  return (
+    <div>
+      Picking a winner...
+    </div>
   )
 }
 
@@ -436,6 +473,7 @@ const EnterBtn = ({ enterLottery, loading }) => {
     </button>
   )
 }
+
 
 
 
