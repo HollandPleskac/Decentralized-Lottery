@@ -406,7 +406,7 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
       </button>
       <button onClick={emitHandler} >Emit a new event</button>
       <button onClick={unsubscribeHandler} >unsubscribe</button>
-      {showPopup && <WinnerPopup exitHandler={exitPopupHandler} />}
+      {showPopup && <WinnerPopup exitHandler={exitPopupHandler} address={winnerData.address} playersEntered={winnerData.numberOfPlayers} etherWon={winnerData.etherAmount} />}
     </>
   )
 }
@@ -426,19 +426,19 @@ const PickingWinnerContent = () => {
   )
 }
 
-const WinnerPopup = ({ exitHandler }) => {
+const WinnerPopup = ({ exitHandler, address, playersEntered, etherWon }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-20 flex justify-center items-center' >
       <div className='relative bg-white p-6 rounded-lg transition ease-in duration-200' >
         <FontAwesomeIcon onClick={exitHandler} icon={faTimes} className='absolute right-3 top-3 cursor-pointer' />
         <h1 className='mb-2 text-xl text-center text-gray-800' >Winner Chosen</h1>
-        <p className='mb-2' >Holland Pleskacasdfasdfasdfdsafdsafds</p>
+        <p className='mb-2' >{address}</p>
         <div className='flex items-center mb-2' >
-          <div className='mr-2 px-2 py-1 rounded-full bg-blue-600 text-white flex justify-center items-center' style={{ width: 35, height: 35 }} >15</div>
+          <div className='mr-2 px-2 py-1 rounded-full bg-blue-600 text-white flex justify-center items-center' style={{ width: 35, height: 35 }} >{playersEntered}</div>
           <p>Players entered</p>
         </div>
         <div className='flex items-center' >
-          <div className='mr-2 px-2 py-1 rounded-full bg-blue-600 text-white flex justify-center items-center' style={{ width: 35, height: 35 }} >3</div>
+          <div className='mr-2 px-2 py-1 rounded-full bg-blue-600 text-white flex justify-center items-center' style={{ width: 35, height: 35 }} >{etherWon}</div>
           <p>Ether won</p>
         </div>
       </div>

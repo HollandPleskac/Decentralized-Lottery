@@ -21,15 +21,16 @@ contract Lottery is VRFConsumerBase {
     }
     
     event PickingWinnerEvent(
+        uint indexed id,
         uint indexed timestamp
     );
     
     event WinnerChosenEvent(
-        uint indexed date,
+        uint indexed id,
         address indexed winnerAddress,
         uint numberOfPlayers,
         uint weiAmount,
-        uint timestamp
+        uint indexed timestamp
     );
     
     constructor()
@@ -46,13 +47,14 @@ contract Lottery is VRFConsumerBase {
     }
     
     function emitEvent() public {
-        emit WinnerChosenEvent(now, address(this), players.length, address(this).balance, now);
+        emit WinnerChosenEvent(nextId, address(this), players.length, address(this).balance, now);
         nextId++;
     }
     
     function requestRandomNumber() public returns (bytes32 requestId) {
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
-        emit PickingWinnerEvent(now);
+        emit PickingWinnerEvent(nextId, now);
+        nextId++;
         state = 'Picking Winner';
         return requestRandomness(keyHash, fee);
     }
@@ -77,7 +79,8 @@ contract Lottery is VRFConsumerBase {
     function pickWinner(uint randomNum) public payable restricted {
         uint index = randomNum % players.length;
         // uint index = random() % players.length;
-        emit WinnerChosenEvent(now, players[index], players.length, address(this).balance, now);
+        emit WinnerChosenEvent(nextId, players[index], players.length, address(this).balance, now);
+        nextId++;
         payable(players[index]).transfer(address(this).balance); // this.balance is the amount of money in the contract
         players = new address[](0); // brand new array of addresses - (0) means the array has an inital size of 0
         state = 'Lottery Running';
