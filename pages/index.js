@@ -24,17 +24,11 @@ listening for events {
 
 
 // got address and abi from remix editor
-const address = '0x9fc9f5FBdEC499E986dB977984DF2ACf2caBDaed'
+const address = '0x85369d293Df303b5D4f886C40ba8676363711FfF'
 const abi = `
 [
 	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "value",
-				"type": "string"
-			}
-		],
+		"inputs": [],
 		"name": "emitEvent",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -43,49 +37,6 @@ const abi = `
 	{
 		"inputs": [],
 		"name": "enter",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "date",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "string",
-				"name": "value",
-				"type": "string"
-			}
-		],
-		"name": "MyEvent",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "randomNum",
-				"type": "uint256"
-			}
-		],
-		"name": "pickWinner",
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
@@ -110,6 +61,43 @@ const abi = `
 	},
 	{
 		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "PickingWinnerEvent",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "randomNum",
+				"type": "uint256"
+			}
+		],
+		"name": "pickWinner",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "requestRandomNumber",
 		"outputs": [
 			{
@@ -120,6 +108,43 @@ const abi = `
 		],
 		"stateMutability": "nonpayable",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "winnerAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "numberOfPlayers",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "weiAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "WinnerChosenEvent",
+		"type": "event"
 	},
 	{
 		"inputs": [],
@@ -197,7 +222,7 @@ const abi = `
 import React, { useContext, useState, useEffect } from 'react'
 import Web3Context from '../context/web3Context'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrophy } from '@fortawesome/free-solid-svg-icons'
+import { faTrophy, faTimes } from '@fortawesome/free-solid-svg-icons'
 import ClipLoader from "react-spinners/ClipLoader";
 import { useRouter } from 'next/router'
 
@@ -261,13 +286,16 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
   const [loading, setLoading] = useState(false)
   const [contractState, setContractState] = useState('')
 
+  const [showPopup, setShowPopup] = useState(false)
+  const [winnerData, setWinnerData] = useState(null)
+
   useEffect(async () => {
 
     const initialContractState = await contract.methods.state().call()
     console.log('initial state', initialContractState)
     setContractState(initialContractState)
 
-    const subscription = contract.events.MyEvent({ fromBlock: 'latest' })
+    const pickingWinnerEventSubscription = contract.events.PickingWinnerEvent({ fromBlock: 'latest' })
       .on('data', async event => {
         const beforeState = await contract.methods.state().call()
         console.log('state before picking winner', beforeState)
@@ -276,15 +304,28 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
         const randomNumber = await contract.methods.randomResult().call()
         console.log('random number', randomNumber)
         await contract.methods.pickWinner(randomNumber).send({ from: ctx.accounts[0] })
+      })
+
+    const winnerChosenEventSubscription = contract.events.WinnerChosenEvent({ fromBlock: 'latest' })
+      .on('data', async event => {
+        console.log('winner was chosen!! event =>', event.returnValues)
+        setWinnerData({
+          address: event.returnValues.winnerAddress,
+          etherAmount: ctx.web3.utils.fromWei(event.returnValues.weiAmount),
+          numberOfPlayers: event.returnValues.numberOfPlayers,
+          timestamp: event.returnValues.timestamp
+        })
 
         const afterState = await contract.methods.state().call()
         console.log('state after picking winner', afterState)
-        // show pop up here (winner chosen was...)
+        setShowPopup(true)
         setContractState(afterState)
       })
 
-    return () => {
-      subscription.unsubscribe()
+
+    return async () => {
+      await pickingWinnerEventSubscription.unsubscribe()
+      await winnerChosenEventSubscription.unsubscribe()
     }
   }, [])
 
@@ -325,7 +366,7 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
   }
 
   const emitHandler = async () => {
-    await contract.methods.emitEvent('hey!').send({ from: ctx.accounts[0] })
+    await contract.methods.emitEvent().send({ from: ctx.accounts[0] })
   }
 
   const unsubscribeHandler = async () => {
@@ -337,11 +378,17 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
     })
   }
 
-  if (contractState === 'Picking Winner' )
-    return ( <div>Picking the winner</div> )
+  const exitPopupHandler = () => {
+    setShowPopup(false)
+  }
+
+
+  if (contractState === 'Picking Winner')
+    return <PickingWinnerContent />
 
   return (
     <>
+      <button onClick={() => { setShowPopup(true) }} >show popup</button>
       <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
       <h1 className='text-5xl text-blue-600 ' >Want to try your luck?</h1>
       <p className='mt-4 text-gray-600' >{(players && players.length) || 0} people entered, competing to win {totalEther || 0} ether</p>
@@ -359,6 +406,7 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
       </button>
       <button onClick={emitHandler} >Emit a new event</button>
       <button onClick={unsubscribeHandler} >unsubscribe</button>
+      {showPopup && <WinnerPopup exitHandler={exitPopupHandler} />}
     </>
   )
 }
@@ -374,6 +422,26 @@ const PickingWinnerContent = () => {
   return (
     <div>
       Picking a winner...
+    </div>
+  )
+}
+
+const WinnerPopup = ({ exitHandler }) => {
+  return (
+    <div className='fixed inset-0 bg-black bg-opacity-20 flex justify-center items-center' >
+      <div className='relative bg-white p-6 rounded-lg transition ease-in duration-200' >
+        <FontAwesomeIcon onClick={exitHandler} icon={faTimes} className='absolute right-3 top-3 cursor-pointer' />
+        <h1 className='mb-2 text-xl text-center text-gray-800' >Winner Chosen</h1>
+        <p className='mb-2' >Holland Pleskacasdfasdfasdfdsafdsafds</p>
+        <div className='flex items-center mb-2' >
+          <div className='mr-2 px-2 py-1 rounded-full bg-blue-600 text-white flex justify-center items-center' style={{ width: 35, height: 35 }} >15</div>
+          <p>Players entered</p>
+        </div>
+        <div className='flex items-center' >
+          <div className='mr-2 px-2 py-1 rounded-full bg-blue-600 text-white flex justify-center items-center' style={{ width: 35, height: 35 }} >3</div>
+          <p>Ether won</p>
+        </div>
+      </div>
     </div>
   )
 }
@@ -415,7 +483,6 @@ const PickWinnerBtn = ({ manager, contract }) => {
 
   const pickWinnerHandler = async () => {
     const accounts = ctx.accounts
-    // set loading true 
     // request a random number
     console.log('requesting a random number')
     await contract.methods.requestRandomNumber().send({ from: accounts[0] })

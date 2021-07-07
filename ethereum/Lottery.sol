@@ -10,6 +10,27 @@ contract Lottery is VRFConsumerBase {
     bytes32 internal keyHash;
     uint256 internal fee;
     uint256 public randomResult;
+    uint internal nextId;
+    
+    string public state;
+    
+    struct WinnerData {
+        address winnerAddress;
+        uint numberOfPlayers;
+        uint etherAmount;
+    }
+    
+    event PickingWinnerEvent(
+        uint indexed timestamp
+    );
+    
+    event WinnerChosenEvent(
+        uint indexed date,
+        address indexed winnerAddress,
+        uint numberOfPlayers,
+        uint weiAmount,
+        uint timestamp
+    );
     
     constructor()
         VRFConsumerBase(
@@ -20,16 +41,25 @@ contract Lottery is VRFConsumerBase {
         manager = msg.sender;
         keyHash = 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311;
         fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)
+        nextId = 0;
+        state = 'Lottery Running';
     }
     
-    function getRandomNumber() public returns (bytes32 requestId) {
+    function emitEvent() public {
+        emit WinnerChosenEvent(now, address(this), players.length, address(this).balance, now);
+        nextId++;
+    }
+    
+    function requestRandomNumber() public returns (bytes32 requestId) {
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
+        emit PickingWinnerEvent(now);
+        state = 'Picking Winner';
         return requestRandomness(keyHash, fee);
     }
     
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         // randomResult = randomness.mod(players.length-1); // numbers from 0 to players.length-1
-        randomResult = randomness.mod(20).add(1);
+        randomResult = randomness;
     }
     
     function enter() public payable {
@@ -44,11 +74,13 @@ contract Lottery is VRFConsumerBase {
         return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, players)));
     }
     
-    function pickWinner() public payable restricted {
-        // uint index = randomResult;
-        uint index = random() % players.length;
+    function pickWinner(uint randomNum) public payable restricted {
+        uint index = randomNum % players.length;
+        // uint index = random() % players.length;
+        emit WinnerChosenEvent(now, players[index], players.length, address(this).balance, now);
         payable(players[index]).transfer(address(this).balance); // this.balance is the amount of money in the contract
         players = new address[](0); // brand new array of addresses - (0) means the array has an inital size of 0
+        state = 'Lottery Running';
     }
     
     // modifiers are used to save code
@@ -63,3 +95,25 @@ contract Lottery is VRFConsumerBase {
     
     
 }
+
+
+// architecture
+
+/*
+onClick pick winner:
+  request random number
+  start loading
+
+fulfill randomness function
+  emit event (pick winner)
+
+listening for events {
+  
+  onPickWinner {
+    return value of winner(index)
+    pickWinner(index -> send money to winner)
+    end loading
+  }
+
+}
+*/
