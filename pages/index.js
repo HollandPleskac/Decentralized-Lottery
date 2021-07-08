@@ -24,41 +24,9 @@ listening for events {
 
 
 // got address and abi from remix editor
-const address = '0x85369d293Df303b5D4f886C40ba8676363711FfF'
+const address = '0xB0Ed966C96562C43A0337C607E427E2Ab205fB83'
 const abi = `
 [
-	{
-		"inputs": [],
-		"name": "emitEvent",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "enter",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "randomness",
-				"type": "uint256"
-			}
-		],
-		"name": "rawFulfillRandomness",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
 	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
@@ -84,30 +52,29 @@ const abi = `
 		"type": "event"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": true,
 				"internalType": "uint256",
-				"name": "randomNum",
+				"name": "id",
 				"type": "uint256"
-			}
-		],
-		"name": "pickWinner",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "requestRandomNumber",
-		"outputs": [
+			},
 			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "playerAddress",
+				"type": "address"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		"name": "PlayerEnteredEvent",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -148,6 +115,20 @@ const abi = `
 	},
 	{
 		"inputs": [],
+		"name": "emitEvent",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "enter",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "getPlayers",
 		"outputs": [
 			{
@@ -170,6 +151,19 @@ const abi = `
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "randomNum",
+				"type": "uint256"
+			}
+		],
+		"name": "pickWinner",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -205,6 +199,37 @@ const abi = `
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "randomness",
+				"type": "uint256"
+			}
+		],
+		"name": "rawFulfillRandomness",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "requestRandomNumber",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "state",
 		"outputs": [
@@ -231,8 +256,6 @@ const HomePage = () => {
 
   const [contract, setContract] = useState(null)
   const [manager, setManager] = useState(null)
-  const [players, setPlayers] = useState(null)
-  const [totalEther, setTotalEther] = useState(null)
 
   useEffect(async () => {
     console.log(ctx.web3)
@@ -243,13 +266,6 @@ const HomePage = () => {
       // set manager
       const managerAddress = await localContract.methods.manager().call() // dont need to specify from: accounts[0] bc first account is used when working with meta mask
       setManager(managerAddress)
-      // set players
-      const playersList = await localContract.methods.getPlayers().call()
-      setPlayers(playersList)
-      // set total ether
-      const contractWei = await ctx.web3.eth.getBalance(localContract.options.address)
-      const contractEther = ctx.web3.utils.fromWei(contractWei)
-      setTotalEther(contractEther)
     }
   }, [ctx.web3])
 
@@ -268,7 +284,7 @@ const HomePage = () => {
         </div>
       </div>
       <div className='flex-grow flex flex-col justify-center items-center' >
-        {ctx.connection === 'CONNECTED' && <ConnectedContent players={players} totalEther={totalEther} contract={contract} />}
+        {ctx.connection === 'CONNECTED' && <ConnectedContent contract={contract} />}
         {ctx.connection === 'DISCONNECTED' && <DisconnectedContent />}
         {ctx.connection === 'NOT INSTALLED' && <MetaMaskNotInstalledContent />}
       </div>
@@ -278,18 +294,32 @@ const HomePage = () => {
 }
 
 
-const ConnectedContent = ({ players, totalEther, contract }) => {
+const ConnectedContent = ({ contract }) => {
   const ctx = useContext(Web3Context)
 
+  // local state
   const [enteredEther, setEnteredEther] = useState('')
   const [feedback, setFeedback] = useState('')
   const [loading, setLoading] = useState(false)
-  const [contractState, setContractState] = useState('')
 
+  // contract state
+  const [contractState, setContractState] = useState('')
+  const [players, setPlayers] = useState(null)
+  const [totalEther, setTotalEther] = useState(null)
+
+  // data from events
   const [showPopup, setShowPopup] = useState(false)
   const [winnerData, setWinnerData] = useState(null)
 
   useEffect(async () => {
+
+    // set players
+    const playersList = await contract.methods.getPlayers().call()
+    setPlayers(playersList)
+    // set total ether
+    const contractWei = await ctx.web3.eth.getBalance(contract.options.address)
+    const contractEther = ctx.web3.utils.fromWei(contractWei)
+    setTotalEther(contractEther)
 
     const initialContractState = await contract.methods.state().call()
     console.log('initial state', initialContractState)
@@ -322,10 +352,22 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
         setContractState(afterState)
       })
 
+    const playerEnteredEventSubscription = contract.events.PlayerEnteredEvent({ fromBlock: 'latest' })
+      .on('data', async event => {
+        console.log('player entered event logged!!', event)
+        // get new players list
+        const newPlayersList = await contract.methods.getPlayers().call()
+        setPlayers(newPlayersList)
+        // get new ether count
+        const newContractWei = await ctx.web3.eth.getBalance(contract.options.address)
+        const newContractEther = ctx.web3.utils.fromWei(newContractWei)
+        setTotalEther(newContractEther)
+      })
 
     return async () => {
       await pickingWinnerEventSubscription.unsubscribe()
       await winnerChosenEventSubscription.unsubscribe()
+      await playerEnteredEventSubscription.unsubscribe()
     }
   }, [])
 
@@ -358,28 +400,14 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
     setEnteredEther(e.target.value)
   }
 
-  const listenHandler = async () => {
-    console.log('listening for events')
-    const subscription = contract.events.MyEvent({ fromBlock: 'latest' }).on('data', event => console.log('new event', event))
-    console.log('Subscription', subscription)
-    setSub(subscription)
+  const exitPopupHandler = () => {
+    setShowPopup(false)
+    setPlayers([])
+    setTotalEther(0)
   }
 
   const emitHandler = async () => {
     await contract.methods.emitEvent().send({ from: ctx.accounts[0] })
-  }
-
-  const unsubscribeHandler = async () => {
-    await sub.unsubscribe((error, success) => {
-      if (success)
-        console.log('Successfully unsubscribed!');
-      else
-        console.log('Error unsubscribing', error)
-    })
-  }
-
-  const exitPopupHandler = () => {
-    setShowPopup(false)
   }
 
 
@@ -388,7 +416,6 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
 
   return (
     <>
-      <button onClick={() => { setShowPopup(true) }} >show popup</button>
       <p className='text-gray-600 text-sm mb-2' >&nbsp;</p>
       <h1 className='text-5xl text-blue-600 ' >Want to try your luck?</h1>
       <p className='mt-4 text-gray-600' >{(players && players.length) || 0} people entered, competing to win {totalEther || 0} ether</p>
@@ -401,11 +428,7 @@ const ConnectedContent = ({ players, totalEther, contract }) => {
           ? <p className='text-gray-600 text-sm mt-2' >&nbsp;</p>
           : <p className='text-gray-600 text-sm mt-2' >{feedback}</p>
       }
-      <button onClick={listenHandler} >
-        Click to listen to events
-      </button>
       <button onClick={emitHandler} >Emit a new event</button>
-      <button onClick={unsubscribeHandler} >unsubscribe</button>
       {showPopup && <WinnerPopup exitHandler={exitPopupHandler} address={winnerData.address} playersEntered={winnerData.numberOfPlayers} etherWon={winnerData.etherAmount} />}
     </>
   )
