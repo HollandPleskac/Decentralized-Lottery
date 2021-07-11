@@ -33,6 +33,12 @@ contract Lottery is VRFConsumerBase {
         uint indexed timestamp
     );
     
+    event PlayerEnteredEvent(
+        uint indexed id,
+        uint indexed timestamp,
+        address indexed playerAddress
+    );
+    
     constructor()
         VRFConsumerBase(
             0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B, // VRF Coordinator
@@ -47,7 +53,8 @@ contract Lottery is VRFConsumerBase {
     }
     
     function emitEvent() public {
-        emit WinnerChosenEvent(nextId, address(this), players.length, address(this).balance, now);
+        // emit WinnerChosenEvent(nextId, address(this), players.length, address(this).balance, now);
+        emit PlayerEnteredEvent(nextId, now, msg.sender);
         nextId++;
     }
     
@@ -70,6 +77,8 @@ contract Lottery is VRFConsumerBase {
           require(players[i] != msg.sender);  
         }
         players.push(msg.sender);
+        emit PlayerEnteredEvent(nextId, now, msg.sender);
+        nextId++;
     }
     
     function random() private view returns (uint) {
@@ -111,8 +120,6 @@ fulfill randomness function
   emit event (pick winner)
 
 listening for events {
-  
-  onPickWinner {
     return value of winner(index)
     pickWinner(index -> send money to winner)
     end loading
