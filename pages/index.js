@@ -24,7 +24,7 @@ listening for events {
 
 
 // got address and abi from remix editor
-const address = '0x4ef6AB4Ad857FbCdb763882e01877F1e2c9f30a6'
+const address = '0x3ACFFEC048f6649996e849b24518CA490fdAb322'
 const abi = `
 [
 	{
@@ -44,14 +44,19 @@ const abi = `
 	{
 		"inputs": [
 			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			},
+			{
 				"internalType": "uint256",
-				"name": "randomNum",
+				"name": "randomness",
 				"type": "uint256"
 			}
 		],
-		"name": "pickWinner",
+		"name": "rawFulfillRandomness",
 		"outputs": [],
-		"stateMutability": "payable",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -102,24 +107,6 @@ const abi = `
 		],
 		"name": "PlayerEnteredEvent",
 		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "randomness",
-				"type": "uint256"
-			}
-		],
-		"name": "rawFulfillRandomness",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -327,13 +314,9 @@ const ConnectedContent = ({ contract }) => {
 
     const pickingWinnerEventSubscription = contract.events.PickingWinnerEvent({ fromBlock: 'latest' })
       .on('data', async event => {
-        const beforeState = await contract.methods.state().call()
-        console.log('state before picking winner', beforeState)
-        setContractState(beforeState)
-
-        const randomNumber = await contract.methods.randomResult().call()
-        console.log('random number', randomNumber)
-        await contract.methods.pickWinner(randomNumber).send({ from: ctx.accounts[0] })
+        const pickingWinnerState = await contract.methods.state().call()
+        console.log('picking winner event fired', pickingWinnerState)
+        setContractState(pickingWinnerState)
       })
 
     const winnerChosenEventSubscription = contract.events.WinnerChosenEvent({ fromBlock: 'latest' })
@@ -346,10 +329,10 @@ const ConnectedContent = ({ contract }) => {
           timestamp: event.returnValues.timestamp
         })
 
-        const afterState = await contract.methods.state().call()
-        console.log('state after picking winner', afterState)
+        const afterWinnerChosenState = await contract.methods.state().call()
+        console.log('state after picking winner', afterWinnerChosenState)
         setShowPopup(true)
-        setContractState(afterState)
+        setContractState(afterWinnerChosenState)
       })
 
     const playerEnteredEventSubscription = contract.events.PlayerEnteredEvent({ fromBlock: 'latest' })

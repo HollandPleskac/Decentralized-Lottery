@@ -58,7 +58,7 @@ contract Lottery is VRFConsumerBase {
         nextId++;
     }
     
-    function requestRandomNumber() public returns (bytes32 requestId) {
+    function requestRandomNumber() public restricted returns (bytes32 requestId) {
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
         emit PickingWinnerEvent(nextId, now);
         nextId++;
@@ -69,6 +69,17 @@ contract Lottery is VRFConsumerBase {
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         // randomResult = randomness.mod(players.length-1); // numbers from 0 to players.length-1
         randomResult = randomness;
+        pickWinner(randomness);
+    }
+    
+    function pickWinner(uint randomNumber) internal {
+        uint index = randomNumber % players.length;
+        // uint index = random() % players.length;
+        emit WinnerChosenEvent(nextId, players[index], players.length, address(this).balance, now);
+        nextId++;
+        payable(players[index]).transfer(address(this).balance); // this.balance is the amount of money in the contract
+        players = new address[](0); // brand new array of addresses - (0) means the array has an inital size of 0
+        state = 'Lottery Running';
     }
     
     function enter() public payable {
@@ -83,16 +94,6 @@ contract Lottery is VRFConsumerBase {
     
     function random() private view returns (uint) {
         return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, players)));
-    }
-    
-    function pickWinner(uint randomNum) public payable restricted {
-        uint index = randomNum % players.length;
-        // uint index = random() % players.length;
-        emit WinnerChosenEvent(nextId, players[index], players.length, address(this).balance, now);
-        nextId++;
-        payable(players[index]).transfer(address(this).balance); // this.balance is the amount of money in the contract
-        players = new address[](0); // brand new array of addresses - (0) means the array has an inital size of 0
-        state = 'Lottery Running';
     }
     
     // modifiers are used to save code
@@ -117,12 +118,12 @@ onClick pick winner:
   start loading
 
 fulfill randomness function
-  emit event (pick winner)
+  pick the winner using the random number
 
 listening for events {
-    return value of winner(index)
-    pickWinner(index -> send money to winner)
-    end loading
+  
+  onPickWinner {
+    show a popup
   }
 
 }
