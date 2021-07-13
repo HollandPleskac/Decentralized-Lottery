@@ -24,7 +24,7 @@ listening for events {
 
 
 // got address and abi from remix editor
-const address = '0x3ACFFEC048f6649996e849b24518CA490fdAb322'
+const address = '0xFFA25Bd7E0094b02Ae8D2eBd621AdCB443864651'
 const abi = `
 [
 	{
@@ -56,6 +56,19 @@ const abi = `
 		],
 		"name": "rawFulfillRandomness",
 		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "requestRandomNumber",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -110,14 +123,8 @@ const abi = `
 	},
 	{
 		"inputs": [],
-		"name": "requestRandomNumber",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "requestId",
-				"type": "bytes32"
-			}
-		],
+		"name": "setChooseWinnerAutomatically",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -157,6 +164,19 @@ const abi = `
 		],
 		"name": "WinnerChosenEvent",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "chooseWinnerAutomatically",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -234,7 +254,7 @@ const abi = `
 import React, { useContext, useState, useEffect } from 'react'
 import Web3Context from '../context/web3Context'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrophy, faTimes } from '@fortawesome/free-solid-svg-icons'
+import { faTrophy, faTimes, faRobot } from '@fortawesome/free-solid-svg-icons'
 import ClipLoader from "react-spinners/ClipLoader";
 import { useRouter } from 'next/router'
 
@@ -268,6 +288,7 @@ const HomePage = () => {
         <div className='flex' >
           <MetaMaskBtn />
           <PickWinnerBtn manager={manager} contract={contract} />
+          <AutomaticallyPickWinnerBtn manager={manager} contract={contract} />
         </div>
       </div>
       <div className='flex-grow flex flex-col justify-center items-center' >
@@ -496,13 +517,45 @@ const PickWinnerBtn = ({ manager, contract }) => {
 
   // not connected (only way to check if addresses are definitively equal to to convert both addresses (strings) to lower case characters)
   if (manager === null || !ctx.accounts[0] || ctx.accounts[0].toLowerCase() !== manager.toLowerCase())
-    return (
-      <div></div>
-    )
+    return <div></div>
 
   return (
     <button onClick={pickWinnerHandler} className='ml-4 rounded-lg bg-red-700 hover:bg-red-800 focus:outline-none focus:ring focus:ring-red-400 focus:ring-opacity-50 transition ease-in duration-100' style={{ width: 40, height: 40 }} >
       <FontAwesomeIcon icon={faTrophy} className='text-white' />
+    </button>
+  )
+}
+
+const AutomaticallyPickWinnerBtn = ({ manager, contract }) => {
+  const ctx = useContext(Web3Context)
+  const [autoPicking, setAutoPicking] = useState(null)
+
+  useEffect(async () => {
+    if (contract) {
+      const initialAutoPickState = await contract.methods.chooseWinnerAutomatically().call()
+      console.log('automatic state', initialAutoPickState)
+      setAutoPicking(initialAutoPickState)
+    }
+  }, [contract])
+
+  const autoPickWinnerHandler = async () => {
+    const accounts = ctx.accounts
+    console.log('changing auto pick winner')
+    await contract.methods.setChooseWinnerAutomatically().send({ from: accounts[0] })
+    setAutoPicking(prevState => !prevState)
+  }
+
+  // not connected (only way to check if addresses are definitively equal to to convert both addresses (strings) to lower case characters)
+  if (manager === null || !ctx.accounts[0] || ctx.accounts[0].toLowerCase() !== manager.toLowerCase())
+    return <div></div>
+
+  const activeBtnColorClasses = 'bg-green-700'
+  const inactiveBtnColorClasses = 'bg-gray-700'
+  const btnColorClasses = autoPicking ? activeBtnColorClasses : inactiveBtnColorClasses
+
+  return (
+    <button onClick={autoPickWinnerHandler} className={'ml-4 rounded-lg focus:outline-none transition ease-in duration-100 ' + btnColorClasses} style={{ width: 40, height: 40 }} >
+      <FontAwesomeIcon icon={faRobot} className='text-white' />
     </button>
   )
 }
