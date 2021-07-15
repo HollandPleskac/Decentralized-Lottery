@@ -13,6 +13,7 @@ contract Lottery is VRFConsumerBase {
     uint internal nextId;
     
     string public state;
+    bool public chooseWinnerAutomatically;
     
     struct WinnerData {
         address winnerAddress;
@@ -50,6 +51,7 @@ contract Lottery is VRFConsumerBase {
         fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)
         nextId = 0;
         state = 'Lottery Running';
+        chooseWinnerAutomatically = true;
     }
     
     function emitEvent() public {
@@ -90,6 +92,14 @@ contract Lottery is VRFConsumerBase {
         players.push(msg.sender);
         emit PlayerEnteredEvent(nextId, now, msg.sender);
         nextId++;
+        if (chooseWinnerAutomatically && players.length >= 1) {
+            // choose the winner
+            requestRandomNumber();
+        }
+    }
+    
+    function setChooseWinnerAutomatically() public restricted {
+        chooseWinnerAutomatically = !chooseWinnerAutomatically;
     }
     
     function random() private view returns (uint) {
